@@ -1,0 +1,61 @@
+{
+  "detection": {
+    "motion": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "parameters": {
+        "history_length": 500,
+        "learning_rate": 0.01,
+        "variance_threshold": 16.0,
+        "detect_shadows": true,
+        "shadow_threshold": 0.5,
+        "min_area": 200.0,
+        "max_area": 50000.0,
+        "dilation_size": 3,
+        "erosion_size": 2
+      }
+    },
+    "intrusion": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "parameters": {
+        "hit_threshold": 0.0,
+        "win_stride": [8, 8],
+        "padding": [32, 32],
+        "scale_factor": 1.05,
+        "group_threshold": 2,
+        "min_area": 1000.0,
+        "max_area": 30000.0
+      }
+    },
+    "fire": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "parameters": {
+        "min_area": 300.0,
+        "max_area": 50000.0,
+        "color_threshold": 0.3,
+        "texture_threshold": 0.4,
+        "flicker_threshold": 0.2,
+        "min_contour_points": 10,
+        "max_history_frames": 5
+      }
+    },
+    "gas_leak": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "parameters": {
+        "min_area": 500.0,
+        "max_area": 100000.0,
+        "color_threshold": 0.2,
+        "texture_threshold": 0.3,
+        "temporal_threshold": 0.4,
+        "min_contour_points": 15,
+        "max_history_frames": 10
+      }
+    },
+    "equipment": {
+      "enabled": false
+    }
+  }
+}

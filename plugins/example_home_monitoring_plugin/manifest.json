@@ -1,0 +1,9 @@
+{
+    "name": "home_monitoring",
+    "version": "1.0.0",
+    "description": "Home monitoring plugin for residential security applications",
+    "type": "server",
+    "author": "SnowOwl Team",
+    "dependencies": [],
+    "entry_point": "libhome_monitoring.so"
+}

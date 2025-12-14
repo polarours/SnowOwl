@@ -1,0 +1,33 @@
+{
+  "device": {
+    "id": "local-edge-device",
+    "name": "Local Edge Device",
+    "kind": "camera"
+  },
+  "capture": {
+    "source_type": "camera",
+    "source_uri": "/dev/video0",
+    "frame_interval_ms": 100
+  },
+  "detection": {
+    "model_name": "yolov8n",
+    "precision": "int8",
+    "model_format": "onnx",
+    "max_model_size_mb": 20.0,
+    "max_latency_ms": 250.0
+  },
+  "uplink": {
+    "enable": true,
+    "registry_path": "postgresql://snowowl_dev:SnowOwl_Dev!@localhost/snowowl_dev",
+    "device_name": "Local Edge Device",
+    "set_primary": true,
+    "auto_detect_cameras": true
+  },
+  "forward": {
+    "enable": true,
+    "host": "",
+    "port": 7500,
+    "frame_interval_ms": 100,
+    "reconnect_delay_ms": 2000 
+  } 
+}

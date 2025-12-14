@@ -1,0 +1,9 @@
+{
+    "name": "industrial_safety_monitoring",
+    "version": "1.0.0",
+    "description": "Industrial safety monitoring plugin for oil and gas applications",
+    "type": "server",
+    "author": "SnowOwl Team",
+    "dependencies": [],
+    "entry_point": "libindustrial_safety.so"
+}

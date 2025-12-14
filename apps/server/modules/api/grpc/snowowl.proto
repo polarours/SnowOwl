@@ -1,0 +1,179 @@
+syntax = "proto3";
+
+package snowowl;
+
+// device management service
+service DeviceService {
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse);
+  rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceResponse);
+  rpc UpdateDevice(UpdateDeviceRequest) returns (UpdateDeviceResponse);
+  rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceResponse);
+  rpc StreamDeviceEvents(StreamDeviceEventsRequest) returns (stream DeviceEvent);
+}
+
+// steam management service
+service StreamService {
+  rpc GetStreamInfo(GetStreamInfoRequest) returns (GetStreamInfoResponse);
+  rpc ControlStream(ControlStreamRequest) returns (ControlStreamResponse);
+  rpc StreamVideo(stream VideoFrame) returns (stream VideoFrameAck);
+}
+
+// real-time monitoring service
+service MonitoringService {
+  rpc GetRealTimeParams(GetRealTimeParamsRequest) returns (GetRealTimeParamsResponse);
+  rpc StreamRealTimeParams(StreamRealTimeParamsRequest) returns (stream RealTimeParamUpdate);
+}
+
+// device message
+message Device {
+  int32 id = 1;
+  string name = 2;
+  DeviceKind kind = 3;
+  string uri = 4;
+  bool is_primary = 5;
+  bool enabled = 6;
+  string metadata = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+enum DeviceKind {
+  UNKNOWN = 0;
+  CAMERA = 1;
+  RTSP = 2;
+  RTMP = 3;
+  FILE = 4;
+  HTTP = 5;
+  HLS = 6;
+  WEBRTC = 7;
+  ONVIF = 8;
+  DISCOVERED = 9;
+}
+
+// request/response messages for device management
+message ListDevicesRequest {}
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message GetDeviceRequest {
+  int32 id = 1;
+}
+message GetDeviceResponse {
+  Device device = 1;
+}
+
+message CreateDeviceRequest {
+  Device device = 1;
+}
+message CreateDeviceResponse {
+  Device device = 1;
+}
+
+message UpdateDeviceRequest {
+  int32 id = 1;
+  Device device = 2;
+}
+message UpdateDeviceResponse {
+  Device device = 1;
+}
+
+message DeleteDeviceRequest {
+  int32 id = 1;
+}
+message DeleteDeviceResponse {}
+
+message StreamDeviceEventsRequest {
+  int32 device_id = 1;
+}
+
+message DeviceEvent {
+  int32 device_id = 1;
+  EventType type = 2;
+  string data = 3;
+  int64 timestamp = 4;
+}
+
+enum EventType {
+  DEVICE_CONNECTED = 0;
+  DEVICE_DISCONNECTED = 1;
+  STREAM_STARTED = 2;
+  STREAM_STOPPED = 3;
+  MOTION_DETECTED = 4;
+}
+
+// streaming media messages
+message GetStreamInfoRequest {
+  int32 device_id = 1;
+}
+message GetStreamInfoResponse {
+  int32 device_id = 1;
+  StreamStatus status = 2;
+  string rtmp_url = 3;
+  string rtsp_url = 4;
+  int32 width = 5;
+  int32 height = 6;
+  double fps = 7;
+}
+
+enum StreamStatus {
+  STOPPED = 0;
+  RUNNING = 1;
+  ERROR = 2;
+}
+
+message ControlStreamRequest {
+  int32 device_id = 1;
+  StreamAction action = 2;
+}
+
+enum StreamAction {
+  START = 0;
+  STOP = 1;
+  RESTART = 2;
+}
+
+message ControlStreamResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VideoFrame {
+  int32 device_id = 1;
+  bytes data = 2;
+  int64 timestamp = 3;
+  FrameFormat format = 4;
+}
+
+enum FrameFormat {
+  JPEG = 0;
+  H264 = 1;
+  H265 = 2;
+}
+
+message VideoFrameAck {
+  int32 device_id = 1;
+  int64 timestamp = 2;
+  bool success = 3;
+}
+
+// monitoring messages
+message GetRealTimeParamsRequest {
+  int32 device_id = 1;
+}
+message GetRealTimeParamsResponse {
+  int32 device_id = 1;
+  map<string, string> params = 2;
+  int64 last_updated = 3;
+}
+
+message StreamRealTimeParamsRequest {
+  int32 device_id = 1;
+}
+message RealTimeParamUpdate {
+  int32 device_id = 1;
+  map<string, string> params = 2;
+  int64 timestamp = 3;
+}
+

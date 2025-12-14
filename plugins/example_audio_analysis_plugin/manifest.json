@@ -1,0 +1,9 @@
+{
+    "name": "audio_analysis",
+    "version": "1.0.0",
+    "description": "Advanced audio analysis plugin with sound event detection and speech recognition",
+    "type": "server",
+    "author": "SnowOwl Team",
+    "dependencies": [],
+    "entry_point": "libaudio_analysis.so"
+}

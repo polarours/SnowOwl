@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    public_member_api_docs: false
+    lines_longer_than_80_chars: false
+    require_trailing_commas: true
+
+analyzer:
+  exclude:
+    - build/**

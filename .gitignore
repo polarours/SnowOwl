@@ -39,3 +39,52 @@
 
 # debug information files
 *.dwo
+
+# IDEs and editors
+.idea/
+.vscode/
+*.code-workspace
+
+# Build directories
+build/
+out/
+cmake-build-*/
+
+# Generated files
+generated/
+
+# Config files
+config/devices.db
+config/edge_device_profile.json
+
+# Cache files
+*.cache
+*.tmp
+*.log
+*.aux
+*.toc
+*.lof
+*.lot
+*.gz
+*.blg
+*.bbl
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.out.ps
+*.out.pdf
+*.pdfsync
+*.dvi
+
+# postgreSQL database files
+postgresql:/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake

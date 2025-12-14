@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Video Player</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #player-container {
+            width: 100%;
+            height: 100%;
+        }
+        #error-message {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        #loading {
+            color: white;
+            text-align: center;
+            display: none;
+        }
+    </style>
+    <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet">
+</head>
+<body>
+    <div id="player-container">
+        <div id="loading">Loading video stream...</div>
+        <div id="error-message"></div>
+        <video id="video-player" class="video-js vjs-default-skin" controls preload="auto"></video>
+    </div>
+
+    <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
+
+    <script>
+        function initializePlayer(streamUrl) {
+            const video = document.getElementById('video-player');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            
+            if (!streamUrl) {
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.innerHTML = '<p>No stream URL provided</p>';
+                return;
+            }
+            
+            // Check if it's an HLS stream
+            if (streamUrl.endsWith('.m3u8')) {
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        loading.style.display = 'none';
+                        video.play().catch(e => {
+                            console.error('Autoplay failed:', e);
+                        });
+                    });
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        loading.style.display = 'none';
+                        errorMessage.style.display = 'block';
+                        errorMessage.innerHTML = `
+                            <p>HLS streaming error:</p>
+                            <p>${data.type}: ${data.details}</p>
+                            <p><strong>Stream URL:</strong> ${streamUrl}</p>
+                        `;
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = streamUrl;
+                    video.addEventListener('loadedmetadata', function() {
+                        loading.style.display = 'none';
+                        video.play().catch(e => {
+                            console.error('Autoplay failed:', e);
+                        });
+                    });
+                } else {
+                    loading.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                    errorMessage.innerHTML = `
+                        <p>HLS is not supported in your browser</p>
+                        <p><strong>Stream URL:</strong> ${streamUrl}</p>
+                    `;
+                }
+            } else if (streamUrl.startsWith('rtmp://')) {
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.innerHTML = `
+                    <p>RTMP stream cannot be played directly in browser.</p>
+                    <p>Please use an external player like VLC:</p>
+                    <p><strong>Stream URL:</strong> ${streamUrl}</p>
+                `;
+            } else {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    loading.style.display = 'none';
+                    video.play().catch(e => {
+                        console.error('Autoplay failed:', e);
+                        errorMessage.style.display = 'block';
+                        errorMessage.innerHTML = `
+                            <p>Failed to autoplay video:</p>
+                            <p>${e.message}</p>
+                            <p><strong>Stream URL:</strong> ${streamUrl}</p>
+                        `;
+                    });
+                });
+                
+                video.addEventListener('error', function(e) {
+                    loading.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                    errorMessage.innerHTML = `
+                        <p>Failed to load video stream:</p>
+                        <p>${video.error ? video.error.message : 'Unknown error'}</p>
+                        <p><strong>Stream URL:</strong> ${streamUrl}</p>
+                    `;
+                });
+            }
+        }
+        
+        // Try to get stream URL from URL parameters (fallback)
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('streamUrl');
+        if (streamUrl) {
+            initializePlayer(streamUrl);
+        }
+    </script>
+</body>
+</html>

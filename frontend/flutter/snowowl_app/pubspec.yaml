@@ -1,0 +1,43 @@
+name: snow_owl
+description: >-
+  SnowOwl mobile application built with Flutter, supporting device management, real-time monitoring, and mobile streaming.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_riverpod: ^2.4.9
+  hooks_riverpod: ^2.4.9
+  go_router: ^14.1.0
+  flutter_animate: ^4.5.0
+  intl: ^0.20.2
+  http: ^1.2.2
+  postgres: ^3.3.0
+  media_kit: ^1.2.2
+  media_kit_video: ^2.0.0
+  media_kit_libs_video: ^1.0.7
+  json_annotation: ^4.9.0
+  equatable: ^2.0.5
+
+  web_socket_channel: any
+  riverpod: any
+  flutter_localizations:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.11
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+  generate: true

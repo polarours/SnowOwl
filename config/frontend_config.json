@@ -1,0 +1,19 @@
+{
+  "api": {
+    "base_url": "http://localhost:8081",
+    "timeout_seconds": 30,
+    "retry_count": 3,
+    "retry_delay_ms": 1000
+  },
+  "websocket": {
+    "enabled": true,
+    "url": "ws://localhost:8081/ws"
+  },
+  "polling": {
+    "enabled": true,
+    "interval_seconds": 30
+  },
+  "database": {
+    "connection_check_interval_seconds": 60
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "device": {
+    "id": "RTSP-Source-01",
+    "name": "Remote RTSP Stream",
+    "kind": "rtsp"
+  },
+  "capture": {
+    "source_type": "rtsp",
+    "source_uri": "rtsp://192.168.1.100/live/stream",
+    "frame_interval_ms": 100
+  },
+  "detection": {
+    "model_name": "yolov8n",
+    "precision": "int8",
+    "model_format": "onnx",
+    "max_model_size_mb": 20.0,
+    "max_latency_ms": 250.0
+  },
+  "uplink": {
+    "enable": true,
+    "registry_path": "postgresql://snowowl_dev:SnowOwl_Dev!@localhost/snowowl_dev",
+    "device_name": "Remote RTSP Stream",
+    "set_primary": false,
+    "auto_detect_cameras": true
+  },
+  "forward": {
+    "enable": true,
+    "host": "",
+    "port": 7500,
+    "frame_interval_ms": 100,
+    "reconnect_delay_ms": 2000 
+  }
+}
