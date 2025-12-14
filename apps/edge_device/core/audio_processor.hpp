@@ -85,6 +85,8 @@ public:
     void setPrivacyMode(bool enable);
     bool isPrivacyModeEnabled() const;
 
+    bool isIntercomMode() const;
+
 private:
     void captureLoop();
     void playbackLoop();
@@ -132,6 +134,8 @@ private:
     
     AudioConfig currentCaptureConfig_;
     AudioConfig currentPlaybackConfig_;
+
+    std::atomic<bool> intercomMode_{false};
 };
 
 }

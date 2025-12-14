@@ -348,19 +348,38 @@ void AudioProcessor::setEchoCancellation(bool enabled) {
 }
 
 bool AudioProcessor::startIntercom(const std::string& targetDevice) {
+    intercomMode_.store(true);
+
     AudioConfig config;
     config.enableEchoCancellation = true;
     config.enableNoiseReduction = true;
-    
+    config.codec = "opus";
+    config.bitrate = 48000;
+    config.channels = 2;
+    config.sampleRate = 128000;
+
     bool captureStarted = startCapture(config);
     bool playbackStarted = startPlayback(config);
-    
-    return captureStarted && playbackStarted;
+
+    if (!captureStarted || !playbackStarted) {
+        if (!captureStarted) {
+            stopPlayback();
+        }
+        if (!playbackStarted) {
+            stopCapture();
+        }
+        intercomMode_.store(false);
+        return false;
+    }
+
+    return true;
 }
 
 void AudioProcessor::stopIntercom() {
     stopCapture();
     stopPlayback();
+
+    intercomMode_.store(false);
 }
 
 void AudioProcessor::setSoundEventCallback(SoundEventCallback callback) {
@@ -537,5 +556,10 @@ void AudioProcessor::playbackLoop() {
 
     playing_ = false;
 }
+
+bool AudioProcessor::isIntercomMode() const {
+    return intercomMode_.load();
+}
+
 
 }
