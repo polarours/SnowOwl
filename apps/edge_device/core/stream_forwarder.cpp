@@ -204,4 +204,26 @@ bool StreamForwarder::sendFrame(const cv::Mat& frame) {
 	return !ec.failed();
 }
 
+std::vector<std::uint8_t> StreamForwarder::encodeAudioData(const std::vector<std::uint8_t>& audioData) const {
+	std::vector<std::uint8_t> buffer;
+	buffer.reserve(audioData.size() + 5);
+	buffer.push_back(static_cast<std::uint8_t>(SnowOwl::Protocol::MessageType::AudioData));
+	writeLE<std::uint32_t>(buffer, static_cast<std::uint32_t>(audioData.size()));
+	buffer.insert(buffer.end(), audioData.begin(), audioData.end());
+	return buffer;
+}
+
+bool StreamForwarder::sendAudioData(const std::vector<std::uint8_t>& audioData) {
+	const auto payload = encodeAudioData(audioData);
+
+	std::lock_guard<std::mutex> lock(connectionMutex_);
+	if (!socket_ || !socket_->is_open()) {
+		return false;
+	}
+
+	boost::system::error_code ec;
+	boost::asio::write(*socket_, boost::asio::buffer(payload), ec);
+	return !ec.failed();
+}
+
 }

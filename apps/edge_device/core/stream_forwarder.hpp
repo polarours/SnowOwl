@@ -14,6 +14,9 @@
 
 namespace SnowOwl::Edge::Core {
 
+// Configuration structure for the StreamForwarder
+// Defines parameters for connecting and sending frames to the server
+// such as host, port, frame interval, and device identification.
 struct ForwarderConfig {
 	bool enabled{false};
 	std::string host{"127.0.0.1"};
@@ -35,11 +38,14 @@ public:
 
 	bool isRunning() const { return running_.load(); }
 
+	bool sendAudioData(const std::vector<std::uint8_t>& audioData);
+
 private:
 	bool ensureConnected();
 	void forwardLoop();
 	bool sendFrame(const cv::Mat& frame);
 	std::vector<std::uint8_t> encodeFrame(const cv::Mat& frame) const;
+	std::vector<std::uint8_t> encodeAudioData(const std::vector<std::uint8_t>& audioData) const;
 
 	ForwarderConfig config_{};
 	StreamCapture* capture_{nullptr};

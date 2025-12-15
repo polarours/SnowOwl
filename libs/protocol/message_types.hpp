@@ -8,7 +8,8 @@ enum class MessageType : std::uint8_t {
     Frame = 0x01,
     Event = 0x02,
     Heartbeat = 0x03,
-    Control = 0x10
+    Control = 0x10,
+    AudioData = 0x20, // new message type for audio data
 };
 
 }

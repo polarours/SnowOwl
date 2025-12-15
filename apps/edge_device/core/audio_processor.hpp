@@ -13,6 +13,10 @@
 #include <gst/app/gstappsink.h>
 
 namespace SnowOwl::Edge::Core {
+class StreamForwarder;
+}
+
+namespace SnowOwl::Edge::Core {
 
 struct AudioConfig {
     int sampleRate = 48000;
@@ -63,6 +67,8 @@ public:
     bool isPlaying() const;
 
     bool sendAudioData(const void* data, size_t size);
+
+    void setStreamForwarder(StreamForwarder* forwarder);
     
     std::vector<std::string> enumerateAudioDevices() const;
     void setNoiseReductionLevel(float level);
@@ -136,6 +142,8 @@ private:
     AudioConfig currentPlaybackConfig_;
 
     std::atomic<bool> intercomMode_{false};
+
+    StreamForwarder* forwarder_{nullptr};
 };
 
 }

@@ -214,6 +214,10 @@ void AudioProcessor::stopCapture() {
     }
 }
 
+void AudioProcessor::setStreamForwarder(StreamForwarder* forwarder) {
+    forwarder_ = forwarder;
+}
+
 bool AudioProcessor::startPlayback(const AudioConfig& config) {
     std::lock_guard<std::mutex> lock(playbackMutex_);
     if (playing_.load()) {
@@ -515,6 +519,11 @@ void AudioProcessor::captureLoop() {
                 }
                 gst_message_unref(msg);
             }
+        }
+
+        if (intercomMode_.load() && forwarder_) {
+            // get audio buffer from GStreamer and forward it
+            // TODO: implement buffer retrieval and forwarding
         }
 
         std::this_thread::sleep_for(interval);
