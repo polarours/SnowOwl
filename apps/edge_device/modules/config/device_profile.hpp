@@ -29,8 +29,8 @@ struct DetectionPolicy {
 };
 
 struct DeviceProfile {
-    std::string deviceId{"edge-device"};
-    std::string name{"Generic Edge Device"};
+    std::string deviceId{"Default"};
+    std::string name{"Default Device"};
     ComputeTier computeTier{ComputeTier::CaptureOnly};
     bool hasDiscreteGpu{false};
     bool supportsFp16{false};
@@ -53,6 +53,7 @@ struct DeviceProfile {
         bool setPrimary{false};
         std::string deviceKindOverride;
         bool autoDetectCameras{false};
+        bool autoDetectAudioDevices{false};
     } registry{};
 
     struct ForwardSettings {

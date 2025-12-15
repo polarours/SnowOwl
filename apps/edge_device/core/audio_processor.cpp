@@ -27,8 +27,13 @@ void AudioProcessor::cleanup() {
 
 std::string AudioProcessor::buildCapturePipelineString(const AudioConfig& config) const {
     std::ostringstream pipeline;
-    
-    pipeline << "autoaudiosrc";
+
+    // Use specified device or default source
+    if (config.deviceId.empty()) {
+        pipeline << "autoaudiosrc";
+    } else {
+        pipeline << "autoaudiosrc device=" << config.deviceId;
+    }
     
     if (config.enableEchoCancellation) {
         pipeline << " ! webrtcechoprocessor";
@@ -56,7 +61,11 @@ std::string AudioProcessor::buildCapturePipelineString(const AudioConfig& config
 std::string AudioProcessor::buildSecureCapturePipelineString(const AudioConfig& config) const {
     std::ostringstream pipeline;
     
-    pipeline << "autoaudiosrc";
+    if (config.deviceId.empty()) {
+        pipeline << "autoaudiosrc";
+    } else {
+        pipeline << "autoaudiosrc device=" << config.deviceId;
+    }
     
     if (config.enableEchoCancellation) {
         pipeline << " ! webrtcechoprocessor";
@@ -104,7 +113,11 @@ std::string AudioProcessor::buildPlaybackPipelineString(const AudioConfig& confi
         pipeline << " ! webrtcechoprocessor";
     }
     
-    pipeline << " ! autoaudiosink";
+    if (!config.deviceId.empty()) {
+        pipeline << " ! autoaudiosink device=" << config.deviceId;
+    } else {
+        pipeline << " ! autoaudiosink";
+    }
     
     return pipeline.str();
 }
@@ -130,7 +143,11 @@ std::string AudioProcessor::buildSecurePlaybackPipelineString(const AudioConfig&
         pipeline << " ! webrtcechoprocessor";
     }
     
-    pipeline << " ! autoaudiosink";
+    if (!config.deviceId.empty()) {
+        pipeline << " ! autoaudiosink device=" << config.deviceId;
+    } else {
+        pipeline << " ! autoaudiosink";
+    }
     
     return pipeline.str();
 }
@@ -337,9 +354,77 @@ bool AudioProcessor::sendAudioData(const void* data, size_t size) {
     return false;
 }
 
-std::vector<std::string> AudioProcessor::enumerateAudioDevices() const {
-    std::vector<std::string> devices;
-    
+std::vector<AudioDevice> AudioProcessor::enumerateAudioDevices() const {
+    std::vector<AudioDevice> devices;
+
+    if (!gst_is_initialized()) {
+        gst_init(nullptr, nullptr);
+    }
+
+    GError* error = nullptr;
+    GstElement* pipeline = gst_parse_launch("pulsesrc ! fakesink", &error);
+
+    if (!pipeline) {
+        std::cerr << "AudioProcessor: failed to create device enumeration pipeline: " 
+                  << (error ? error->message : "unknown error") << std::endl;
+        if (error) {
+            g_error_free(error);
+        }
+        return devices;
+    }
+
+    GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "autoaudiosrc0");
+    if (!source) {
+        std::cerr << "AudioProcessor: failed to get source element for device enumeration" << std::endl;
+        gst_object_unref(pipeline);
+        return devices;
+    }
+
+    GObjectClass* klass = G_OBJECT_GET_CLASS(source);
+    GParamSpec** properties = g_object_class_list_properties(klass, nullptr);
+
+    bool foundDeviceProperty = false;
+    for (int i = 0; properties && properties[i] != nullptr; ++i) {
+        const char* prop_name = g_param_spec_get_name(properties[i]);
+        if (g_str_has_prefix(prop_name, "device") 
+            || g_str_has_prefix(prop_name, "device-name")
+            || g_str_has_prefix(prop_name, "device-id")) {
+            
+            GValue value = G_VALUE_INIT;
+            g_value_init(&value, properties[i]->value_type);
+            g_object_get_property(G_OBJECT(source), prop_name, &value);
+
+            if (G_VALUE_HOLDS_STRING(&value)) {
+                const char* str_val = g_value_get_string(&value);
+                if (str_val && *str_val) {
+                    AudioDevice device;
+                    device.id = str_val;
+                    device.name = str_val;
+                    device.description = str_val;
+                    device.isInput = true;
+                    device.isOutput = false;
+                    devices.push_back(device);
+                    foundDeviceProperty = true;
+                }
+            }
+            g_value_unset(&value);
+        }
+    }
+
+    g_free(properties);
+    gst_object_unref(source);
+    gst_object_unref(pipeline);
+
+    if (devices.empty()) {
+        AudioDevice defaultDevice;
+        defaultDevice.id = "default";
+        defaultDevice.name = "Default Audio Device";
+        defaultDevice.description = "System Default Audio Device";
+        defaultDevice.isInput = true;
+        defaultDevice.isOutput = true;
+        devices.push_back(defaultDevice);
+    }
+
     return devices;
 }
 
@@ -479,7 +564,7 @@ bool AudioProcessor::detectSoundEvent(const std::vector<float>& audioData) {
         std::lock_guard<std::mutex> lock(callbackMutex_);
         if (soundEventCallback_) {
             SoundEvent event;
-            event.type = SoundEventType::Custom;
+            event.type = SoundEventType::unknown;
             event.timestamp = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now().time_since_epoch()).count()) / 1000.0;
             event.confidence = std::min(1.0, energy / (threshold * 2));
@@ -615,7 +700,7 @@ void AudioProcessor::processAudioBuffer(GstBuffer* buffer) {
         } else {
             std::cerr << "AudioProcessor: empty audio buffer" << std::endl;
         }
-        
+
         gst_buffer_unmap(buffer, &map);
     } else {
         std::cerr << "AudioProcessor: failed to map audio buffer" << std::endl;

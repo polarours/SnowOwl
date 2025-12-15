@@ -21,6 +21,7 @@ class StreamForwarder;
 namespace SnowOwl::Edge::Core {
 
 struct AudioConfig {
+    std::string deviceId;
     int sampleRate = 48000;
     int channels = 2;
     std::string codec = "opus";
@@ -31,12 +32,20 @@ struct AudioConfig {
     std::string encryptionKey;
 };
 
+struct AudioDevice {
+    std::string id;
+    std::string name;
+    std::string description;
+    bool isInput;
+    bool isOutput;
+};
+
 enum class SoundEventType {
-    GlassBreak,
-    Shout,
-    Scream,
-    Gunshot,
-    Custom
+    cry,
+    dogBark,
+    glassBreak,
+    smokeAlarm,
+    unknown
 };
 
 struct SoundEvent {
@@ -72,7 +81,7 @@ public:
 
     void setStreamForwarder(StreamForwarder* forwarder);
     
-    std::vector<std::string> enumerateAudioDevices() const;
+    std::vector<AudioDevice> enumerateAudioDevices() const;
     void setNoiseReductionLevel(float level);
     void setEchoCancellation(bool enabled);
     bool startIntercom(const std::string& targetDevice);

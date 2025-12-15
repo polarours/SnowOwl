@@ -186,6 +186,10 @@ void DeviceController::applyProfile() {
         autoDetectAndRegisterCameras();
     }
 
+    if (profile_.registry.autoDetectAudioDevices) {
+        autoDetectAndRegisterAudioDevices();
+    }
+
     refreshOperationalState();
 }
 
@@ -260,7 +264,7 @@ std::vector<int> DeviceController::enumerateCameras() const {
 
     for (int i = 0; i < maxCamerasToCheck; ++i) {
 #if defined(__linux__)
-        cv::VideoCapture cap(i, cv::CAP_V4L2);
+        cv::VideoCapture cap(i);
         if (!cap.isOpened()) {
             cap.open(i);
         }
@@ -284,8 +288,7 @@ std::vector<int> DeviceController::enumerateCameras() const {
     return availableCameras;
 }
 
-void DeviceController::autoDetectAndRegisterCameras()
-{
+void DeviceController::autoDetectAndRegisterCameras() {
     if (!profile_.registry.enable) {
         return;
     }
@@ -349,6 +352,118 @@ void DeviceController::autoDetectAndRegisterCameras()
     }
 }
 
+void DeviceController::autoDetectAndRegisterAudioDevices() {
+    if (!profile_.registry.enable) {
+        return;
+    }
+
+    std::string registryPath = profile_.registry.registryPath;
+    if (registryPath.empty()) {
+        registryPath = "postgresql://snowowl_dev:SnowOwl_Dev!@localhost/snowowl_dev";
+    }
+
+    if (registryPath.empty()) {
+        return;
+    }
+
+    SnowOwl::Config::DeviceRegistry registry;
+    if (!registry.open(registryPath)) {
+        std::cerr << "DeviceController: failed to open device registry at " << registryPath << std::endl;
+        databaseConnected_ = false;
+        return;
+    }
+
+    databaseConnected_ = true;
+
+    const auto availableAudioDevices = audioProcessor_.enumerateAudioDevices();
+    if (availableAudioDevices.empty()) {
+        std::cerr << "DeviceController: no audio devices found on the system." << std::endl;
+        return;
+    }
+
+    for (size_t i = 0; i < availableAudioDevices.size(); ++i) {
+        const auto& audioDevice = availableAudioDevices[i];
+
+        SnowOwl::Config::DeviceRecord micRecord;
+        micRecord.name = "Auto Detected Microphone: " + audioDevice.name;
+        micRecord.kind = SnowOwl::Config::DeviceKind::Microphone;
+        micRecord.enabled = true;
+        micRecord.isPrimary = false;
+        micRecord.uri = "microphone://" + audioDevice.name;
+        nlohmann::json micMetadata = nlohmann::json::object();
+        micMetadata["origin"] = "edge";
+        micMetadata["edge_device"] = {
+            {"id", profile_.deviceId},
+            {"name", profile_.name},
+            {"host", resolveHostName()},
+            {"device_name", audioDevice.name},
+            {"device_index", static_cast<int>(i)},
+            {"compute_tier", Config::toString(profile_.computeTier)},
+            {"supports_fp16", profile_.supportsFp16},
+            {"has_discrete_gpu", profile_.hasDiscreteGpu}
+        };
+        micMetadata["audio_device"] = {
+            {"type", "microphone"},
+            {"device_index", static_cast<int>(i)},
+            {"device_name", audioDevice.name}
+        };
+        micMetadata["auto_detected"] = true;
+        micRecord.metadata = micMetadata.dump();
+
+        if (auto existing = registry.findByUri(micRecord.uri)) {
+            micRecord.id = existing->id;
+        }
+        
+        auto stored = registry.upsertDevice(micRecord);
+        if (stored.id > 0) {
+            std::cout << "DeviceController: registered microphone device '" << micRecord.name 
+                      << "' with ID " << stored.id << std::endl;
+        } else {
+            std::cerr << "DeviceController: failed to register microphone device '" 
+                      << micRecord.name << "'" << std::endl;
+        }
+
+        SnowOwl::Config::DeviceRecord speakerRecord;
+        speakerRecord.name = "Auto Detected Speaker: " + audioDevice.name;
+        speakerRecord.kind = SnowOwl::Config::DeviceKind::Speaker;
+        speakerRecord.enabled = true;
+        speakerRecord.isPrimary = false;
+        speakerRecord.uri = "speaker://" + audioDevice.name;
+        nlohmann::json speakerMetadata = nlohmann::json::object();
+        speakerMetadata["origin"] = "edge";
+        speakerMetadata["edge_device"] = {
+            {"id", profile_.deviceId},
+            {"name", profile_.name},
+            {"host", resolveHostName()},
+            {"device_name", audioDevice.name},
+            {"device_index", static_cast<int>(i)},
+            {"compute_tier", Config::toString(profile_.computeTier)},
+            {"supports_fp16", profile_.supportsFp16},
+            {"has_discrete_gpu", profile_.hasDiscreteGpu}
+        };
+        speakerMetadata["audio_device"] = {
+            {"type", "speaker"},
+            {"device_index", static_cast<int>(i)},
+            {"device_name", audioDevice.name}
+        };
+        speakerMetadata["auto_detected"] = true;
+        speakerRecord.metadata = speakerMetadata.dump();
+
+        if (auto existing = registry.findByUri(speakerRecord.uri)) {
+            speakerRecord.id = existing->id;
+        }
+
+        auto storedSpeaker = registry.upsertDevice(speakerRecord);
+        if (storedSpeaker.id > 0) {
+            std::cout << "DeviceController: registered speaker device '" << speakerRecord.name 
+                      << "' with ID " << storedSpeaker.id << std::endl;
+        } else {
+            std::cerr << "DeviceController: failed to register speaker device '"
+                      << speakerRecord.name << "'" << std::endl;
+        }  
+    }
+}
+
 bool DeviceController::startAudioCapture(const AudioConfig& config)
 {
 
@@ -384,8 +499,7 @@ bool DeviceController::isAudioPlaybackRunning() const
     return audioProcessor_.isPlaying();
 }
 
-std::vector<std::string> DeviceController::enumerateAudioDevices() const
-{
+std::vector<AudioDevice> DeviceController::enumerateAudioDevices() {
     return audioProcessor_.enumerateAudioDevices();
 }
 
@@ -404,28 +518,23 @@ bool DeviceController::startIntercom(const std::string& targetDevice)
     return audioProcessor_.startIntercom(targetDevice);
 }
 
-void DeviceController::stopIntercom()
-{
+void DeviceController::stopIntercom() {
     audioProcessor_.stopIntercom();
 }
 
-void DeviceController::setSoundEventCallback(SoundEventCallback callback)
-{
+void DeviceController::setSoundEventCallback(SoundEventCallback callback) {
     audioProcessor_.setSoundEventCallback(callback);
 }
 
-void DeviceController::enableSoundEventDetection(bool enable)
-{
+void DeviceController::enableSoundEventDetection(bool enable) {
     audioProcessor_.enableSoundEventDetection(enable);
 }
 
-void DeviceController::setAudioTriggeredRecording(bool enable)
-{
+void DeviceController::setAudioTriggeredRecording(bool enable) {
     audioProcessor_.setAudioTriggeredRecording(enable);
 }
 
-bool DeviceController::isSoundEventDetectionEnabled() const
-{
+bool DeviceController::isSoundEventDetectionEnabled() const {
     return audioProcessor_.isSoundEventDetectionEnabled();
 }
 

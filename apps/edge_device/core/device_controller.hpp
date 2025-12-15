@@ -84,7 +84,9 @@ private:
     void applyProfile();
     void refreshOperationalState();
     std::vector<int> enumerateCameras() const;
+    std::vector<AudioDevice> enumerateAudioDevices();
     void autoDetectAndRegisterCameras();
+    void autoDetectAndRegisterAudioDevices();
     bool tryRegisterViaDatabase();
     bool tryRegisterViaApi() const;
 
