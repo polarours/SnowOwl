@@ -4,7 +4,7 @@
 #include <thread>
 #include <sstream>
 #include <cmath>
-#include <algorithm>
+#include <algorithm>  
 
 namespace SnowOwl::Edge::Core {
 
@@ -522,8 +522,12 @@ void AudioProcessor::captureLoop() {
         }
 
         if (intercomMode_.load() && forwarder_) {
-            // get audio buffer from GStreamer and forward it
-            // TODO: implement buffer retrieval and forwarding
+            GstBuffer* buffer = getAudioBuffer();
+            if (buffer) {
+                processAudioBuffer(buffer);
+
+                gst_buffer_unref(buffer);
+            }
         }
 
         std::this_thread::sleep_for(interval);
@@ -570,5 +574,52 @@ bool AudioProcessor::isIntercomMode() const {
     return intercomMode_.load();
 }
 
+GstBuffer* AudioProcessor::getAudioBuffer() {
+    if (!captureSink_) {
+        return nullptr;
+    }
+
+    GstSample* sample = gst_app_sink_pull_sample(GST_APP_SINK(captureSink_));
+    if (!sample) {
+        return nullptr;
+    }
+
+    GstBuffer* buffer = gst_sample_get_buffer(sample);
+    if (buffer) {
+        gst_buffer_ref(buffer);
+    }
+
+    gst_sample_unref(sample);
+
+    return buffer;
+}
+
+void AudioProcessor::processAudioBuffer(GstBuffer* buffer) {
+    if (!buffer) {
+        std::cerr << "AudioProcessor: null buffer in processAudioBuffer" << std::endl;
+        return;
+    }
+
+    if (!forwarder_) {
+        std::cerr << "AudioProcessor: no StreamForwarder set" << std::endl;
+        return;
+    }
+
+    GstMapInfo map;
+    if (gst_buffer_map(buffer, &map, GST_MAP_READ)) {
+        if (map.size > 0) {
+            std::vector<std::uint8_t> audioData(map.data, map.data + map.size);
+            if (!forwarder_->sendAudioData(audioData)) {
+                std::cerr << "AudioProcessor: failed to forward audio data" << std::endl;
+            }
+        } else {
+            std::cerr << "AudioProcessor: empty audio buffer" << std::endl;
+        }
+        
+        gst_buffer_unmap(buffer, &map);
+    } else {
+        std::cerr << "AudioProcessor: failed to map audio buffer" << std::endl;
+    }
+}
 
 }

@@ -60,6 +60,10 @@ std::string normalizeLabel(DeviceKind kind) {
             return "onvif";
         case DeviceKind::Discovered: 
             return "discovered";
+        case DeviceKind::Microphone:
+            return "microphone";
+        case DeviceKind::Speaker:
+            return "speaker";
         default: 
             return "unknown";
     }
@@ -92,6 +96,12 @@ DeviceKind kindFromLabel(const std::string& value) {
     }
     if (value == "discovered") {
         return DeviceKind::Discovered;
+    }
+    if (value == "microphone") {
+        return DeviceKind::Microphone;
+    }
+    if (value == "speaker") {
+        return DeviceKind::Speaker;
     }
     return DeviceKind::Unknown;
 }

@@ -10,6 +10,8 @@ typedef struct pg_result PGresult;
 
 namespace SnowOwl::Config {
 
+// device kinds supported by the system
+// also include streaming protocols for easier filtering.
 enum class DeviceKind {
     Unknown,
     Camera,
@@ -20,7 +22,9 @@ enum class DeviceKind {
     HLS,          
     WebRTC,       
     ONVIF,        
-    Discovered    
+    Discovered,
+    Microphone,
+    Speaker
 };
 
 struct DeviceRecord {

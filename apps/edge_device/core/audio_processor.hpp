@@ -12,6 +12,8 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 
+#include "stream_forwarder.hpp"
+
 namespace SnowOwl::Edge::Core {
 class StreamForwarder;
 }
@@ -104,6 +106,8 @@ private:
     std::string buildSecureCapturePipelineString(const AudioConfig& config) const;
     std::string buildSecurePlaybackPipelineString(const AudioConfig& config) const;
 
+    void processAudioBuffer(GstBuffer* buffer);
+
     GstElement* capturePipeline_ = nullptr;
     GstElement* captureSink_ = nullptr;
     GstBus* captureBus_ = nullptr;
@@ -144,6 +148,8 @@ private:
     std::atomic<bool> intercomMode_{false};
 
     StreamForwarder* forwarder_{nullptr};
+
+    GstBuffer* getAudioBuffer();
 };
 
 }
