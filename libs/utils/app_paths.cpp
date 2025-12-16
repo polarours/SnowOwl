@@ -17,7 +17,7 @@
 #else
 #endif
 
-namespace SnowOwl::Common::Utils {
+namespace SnowOwl::Utils::Paths {
 
 namespace {
 

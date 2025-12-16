@@ -8,7 +8,7 @@
 typedef struct pg_conn PGconn;
 typedef struct pg_result PGresult;
 
-namespace SnowOwl::Config {
+namespace SnowOwl::Config::DeviceRegistry {
 
 enum class DeviceKind {
     Unknown,

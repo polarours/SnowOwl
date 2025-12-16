@@ -7,10 +7,7 @@
 #include <thread>
 #include <utility>
 
-#include <QMetaObject>
-
-#include "core/streams/video_capture.hpp"
-#include "core/streams/video_capture_manager.hpp"
+#include "video_capture.hpp"
 
 namespace {
 

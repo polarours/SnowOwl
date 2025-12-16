@@ -1,11 +1,11 @@
-#include "modules/monitoring/resource_tracker.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <limits>
 #include <string>
 #include <vector>
+
+#include "resource_tracker.hpp"
 
 namespace {
 
@@ -75,9 +75,9 @@ MemInfo readMemInfo() {
 }
 #endif
 
-} // namespace
+}
 
-namespace SnowOwl::Edge::Monitoring {
+namespace SnowOwl::Utils::SystemResources {
 
 ResourceTracker::ResourceTracker() = default;
 
@@ -200,4 +200,4 @@ ResourceSnapshot ResourceTracker::collectFromSystem() {
 	return snapshot;
 }
 
-} // namespace SnowOwl::Edge::Monitoring
+}

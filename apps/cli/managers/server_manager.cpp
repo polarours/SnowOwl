@@ -25,8 +25,8 @@
 #include <gst/gst.h>
 #include <nlohmann/json.hpp>
 
-#include "common/config/device_registry.hpp"
-#include "common/config/config_manager.hpp"
+#include "libs/database/device_registry.hpp"
+#include "libs/config/config_manager.hpp"
 #include "plugin/plugin_manager.hpp"
 #include "core/streams/stream_dispatcher.hpp"
 #include "core/streams/video_capture_manager.hpp"
@@ -451,6 +451,8 @@ int ServerManager::startServer(const po::variables_map& vm) {
     gst_init(nullptr, nullptr);
 
     namespace fs = std::filesystem;
+    using SnowOwl::Server::Monitoring::SystemProbe;
+    using SnowOwl::Server::Monitoring::ResourceTracker;
     using SnowOwl::Config::DeviceKind;
     using SnowOwl::Config::DeviceRecord;
     using SnowOwl::Config::DeviceRegistry;

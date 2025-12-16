@@ -14,8 +14,8 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
-#include "core/streams/video_capture.hpp"
-#include "core/streams/video_processor.hpp"
+#include "video_capture.hpp"
+#include "video_processor.hpp"
 #include "detection/detection_types.hpp"
 
 namespace SnowOwl::Server::Core {

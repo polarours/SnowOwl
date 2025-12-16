@@ -15,9 +15,9 @@
 #include <nlohmann/json.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
-#include "core/device_controller.hpp"
-#include "common/config/device_registry.hpp"
-#include "common/utils/app_paths.hpp"
+#include "device_controller.hpp"
+#include "libs/database/device_registry.hpp"
+#include "libs/utils/app_paths.hpp"
 #include "modules/config/device_config.hpp"
 
 namespace {
@@ -51,6 +51,11 @@ std::string resolveHostName() {
 
 namespace SnowOwl::Edge::Core {
 
+using SnowOwl::Utils::Monitoring::ResourceSnapshot;
+using SnowOwl::Utils::Monitoring::SystemProbe;
+using SnowOwl::Utils::Monitoring::HealthStatus;  
+using SnowOwl::Utils::Monitoring::HealthThresholds; 
+    
 DeviceController::DeviceController()
     : profile_(Config::DeviceProfile::makeDefault()) 
     , forwarder_(std::make_shared<StreamForwarder>())
@@ -143,7 +148,7 @@ ForwarderConfig DeviceController::buildForwarderConfig() const {
 }
 
 void DeviceController::applyProfile() {
-    systemInfo_ = Monitoring::SystemProbe::collect();
+    systemInfo_ = SystemProbe::collect();
 
     if (systemInfo_.physicalCores > 0 && systemInfo_.physicalCores != profile_.cpuCores) {
         profile_.cpuCores = systemInfo_.physicalCores;
@@ -168,7 +173,7 @@ void DeviceController::applyProfile() {
 
     forwarderConfig_ = buildForwarderConfig();
     forwarder_->configure(forwarderConfig_);
-    Monitoring::HealthThresholds thresholds;
+    HealthThresholds thresholds;
     if (profile_.computeTier == Config::ComputeTier::FullInference) {
         thresholds.maxCpuPercent = 95.0;
         thresholds.maxMemoryPercent = 95.0;
@@ -232,11 +237,11 @@ void DeviceController::stopCapture() {
     refreshOperationalState();
 }
 
-Monitoring::ResourceSnapshot DeviceController::latestResourceSnapshot() const {
+ResourceSnapshot DeviceController::latestResourceSnapshot() const {
     return resourceTracker_.latestSnapshot();
 }
 
-Monitoring::HealthStatus DeviceController::healthStatus() const {
+HealthStatus DeviceController::healthStatus() const {
     std::lock_guard<std::mutex> lock(healthMutex_);
     return healthStatus_;
 }
@@ -260,7 +265,7 @@ std::vector<int> DeviceController::enumerateCameras() const {
 
     for (int i = 0; i < maxCamerasToCheck; ++i) {
 #if defined(__linux__)
-        cv::VideoCapture cap(i, cv::CAP_V4L2);
+        cv::VideoCapture cap(i);
         if (!cap.isOpened()) {
             cap.open(i);
         }
