@@ -4,7 +4,7 @@
 #include <string>
 
 #include "modules/config/device_profile.hpp"
-#include "modules/monitoring/health_monitor.hpp"
+#include "utils/health_monitor.hpp"
 
 namespace SnowOwl::Edge::Utils {
 
@@ -31,7 +31,7 @@ public:
 	void applyPolicy(const PowerPolicy& policy);
 	PowerPolicy currentPolicy() const;
 
-	void onHealthUpdate(const Monitoring::HealthStatus& status);
+	void onHealthUpdate(const SnowOwl::Utils::SystemResources::HealthStatus& status);
 
 private:
 	void logTransition(const PowerPolicy& from, const PowerPolicy& to) const;

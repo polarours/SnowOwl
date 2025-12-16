@@ -8,13 +8,22 @@
 #include "core/stream_forwarder.hpp"
 #include "core/audio_processor.hpp"
 #include "modules/config/device_profile.hpp"
-#include "modules/monitoring/health_monitor.hpp"
-#include "modules/monitoring/resource_tracker.hpp"
-#include "modules/monitoring/system_probe.hpp"
+#include "utils/health_monitor.hpp"
+#include "utils/resource_tracker.hpp"
+#include "utils/system_probe.hpp"
 #include "modules/utils/encoder_selector.hpp"
 #include "modules/utils/power_manager.hpp"
+#include "config/device_registry.hpp"
 
 namespace SnowOwl::Edge::Core {
+
+using SnowOwl::Utils::SystemResources::ResourceSnapshot;
+using SnowOwl::Utils::SystemResources::HealthStatus;
+using SnowOwl::Utils::SystemResources::SystemInfo;
+using SnowOwl::Utils::SystemResources::ResourceTracker;
+using SnowOwl::Utils::SystemResources::HealthMonitor;
+using SnowOwl::Config::DeviceRecord;
+using SnowOwl::Config::DeviceKind;
 
 class DeviceController {
 public:
@@ -25,7 +34,7 @@ public:
     void setProfile(const Config::DeviceProfile& profile);
 
     const Config::DeviceProfile& profile() const { return profile_; }
-    const Monitoring::SystemInfo& systemInfo() const { return systemInfo_; }
+    const SystemInfo& systemInfo() const { return systemInfo_; }
 
     bool shouldRunLocalDetection() const; 
     std::string recommendedModel() const;
@@ -68,8 +77,8 @@ public:
     void setApiEndpoint(const std::string& apiEndpoint);
     bool registerVideoSourceViaApi() const;
 
-    Monitoring::ResourceSnapshot latestResourceSnapshot() const;
-    Monitoring::HealthStatus healthStatus() const;
+    ResourceSnapshot latestResourceSnapshot() const;
+    HealthStatus healthStatus() const;
     const Utils::EncoderChoice& encoderChoice() const { return encoderChoice_; }
     const Utils::PowerPolicy& powerPolicy() const { return powerPolicy_; }
 
@@ -97,11 +106,11 @@ private:
     std::shared_ptr<StreamForwarder> forwarder_ {};
     AudioProcessor audioProcessor_ {};
 
-    Monitoring::ResourceTracker resourceTracker_ {};
-    Monitoring::HealthMonitor healthMonitor_ {};
+    ResourceTracker resourceTracker_ {};
+    HealthMonitor healthMonitor_ {};
     mutable std::mutex healthMutex_ {};
-    Monitoring::HealthStatus healthStatus_ {};
-    Monitoring::SystemInfo systemInfo_ {};
+    HealthStatus healthStatus_ {};
+    SystemInfo systemInfo_ {};
 
     Utils::EncoderSelector encoderSelector_ {};
     Utils::EncoderChoice encoderChoice_ {};

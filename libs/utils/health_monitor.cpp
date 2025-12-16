@@ -1,8 +1,8 @@
 #include <cmath>
 
-#include "modules/monitoring/health_monitor.hpp"
+#include "health_monitor.hpp"
 
-namespace SnowOwl::Edge::Monitoring {
+namespace SnowOwl::Utils::SystemResources {
 
 HealthMonitor::HealthMonitor() = default;
 HealthMonitor::~HealthMonitor() = default;

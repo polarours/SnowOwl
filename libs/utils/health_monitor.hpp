@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "modules/monitoring/resource_tracker.hpp"
+#include "resource_tracker.hpp"
 
-namespace SnowOwl::Edge::Monitoring {
+namespace SnowOwl::Utils::SystemResources {
 
 struct HealthThresholds {
 	double maxCpuPercent{95.0};

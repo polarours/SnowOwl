@@ -15,9 +15,9 @@
 #include <nlohmann/json.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
-#include "core/device_controller.hpp"
-#include "common/config/device_registry.hpp"
-#include "common/utils/app_paths.hpp"
+#include "device_controller.hpp"
+#include "config/device_registry.hpp"
+#include "utils/app_paths.hpp"
 #include "modules/config/device_config.hpp"
 
 namespace {
@@ -51,6 +51,13 @@ std::string resolveHostName() {
 
 namespace SnowOwl::Edge::Core {
 
+using SnowOwl::Utils::SystemResources::ResourceSnapshot;
+using SnowOwl::Utils::SystemResources::SystemProbe;
+using SnowOwl::Utils::SystemResources::HealthStatus;  
+using SnowOwl::Utils::SystemResources::HealthThresholds;
+using SnowOwl::Config::DeviceRecord;
+using SnowOwl::Config::DeviceKind; 
+    
 DeviceController::DeviceController()
     : profile_(Config::DeviceProfile::makeDefault()) 
     , forwarder_(std::make_shared<StreamForwarder>())
@@ -143,7 +150,7 @@ ForwarderConfig DeviceController::buildForwarderConfig() const {
 }
 
 void DeviceController::applyProfile() {
-    systemInfo_ = Monitoring::SystemProbe::collect();
+    systemInfo_ = SystemProbe::collect();
 
     if (systemInfo_.physicalCores > 0 && systemInfo_.physicalCores != profile_.cpuCores) {
         profile_.cpuCores = systemInfo_.physicalCores;
@@ -168,7 +175,7 @@ void DeviceController::applyProfile() {
 
     forwarderConfig_ = buildForwarderConfig();
     forwarder_->configure(forwarderConfig_);
-    Monitoring::HealthThresholds thresholds;
+    HealthThresholds thresholds;
     if (profile_.computeTier == Config::ComputeTier::FullInference) {
         thresholds.maxCpuPercent = 95.0;
         thresholds.maxMemoryPercent = 95.0;
@@ -236,11 +243,11 @@ void DeviceController::stopCapture() {
     refreshOperationalState();
 }
 
-Monitoring::ResourceSnapshot DeviceController::latestResourceSnapshot() const {
+ResourceSnapshot DeviceController::latestResourceSnapshot() const {
     return resourceTracker_.latestSnapshot();
 }
 
-Monitoring::HealthStatus DeviceController::healthStatus() const {
+HealthStatus DeviceController::healthStatus() const {
     std::lock_guard<std::mutex> lock(healthMutex_);
     return healthStatus_;
 }

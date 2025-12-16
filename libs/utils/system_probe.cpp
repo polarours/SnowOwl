@@ -1,5 +1,3 @@
-#include "modules/monitoring/system_probe.hpp"
-
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -8,10 +6,11 @@
 #include <system_error>
 #include <thread>
 #include <vector>
-
 #include <sys/utsname.h>
 
-namespace SnowOwl::Edge::Monitoring {
+#include "system_probe.hpp"
+
+namespace SnowOwl::Utils::SystemResources {
 
 namespace {
 
@@ -87,9 +86,7 @@ GpuVendor detectGpuVendors() {
 }
 
 
-} // namespace
-
-
+}
 
 SystemInfo SystemProbe::collect() {
     SystemInfo info;

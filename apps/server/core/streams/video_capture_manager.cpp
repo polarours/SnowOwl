@@ -1,4 +1,5 @@
 #include "video_capture_manager.hpp"
+#include "video_capture.hpp"
 
 #include <iostream>
 

@@ -10,15 +10,10 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
+#include "core/streams/capture_types.hpp"
+#include "core/streams/video_capture_manager.hpp"
+
 namespace SnowOwl::Server::Core {
-
-enum class CaptureSourceKind {
-    Camera,
-    NetworkStream,
-    RtmpStream,
-    File
-};
-
 
 struct CaptureConfig {
     std::string resolution = "1920x1080";

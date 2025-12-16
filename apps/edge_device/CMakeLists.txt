@@ -8,9 +8,6 @@ set(EDGE_CORE_SOURCES
 	core/audio_processor.cpp
 	modules/config/device_config.cpp
 	modules/config/device_profile.cpp
-	modules/monitoring/health_monitor.cpp
-	modules/monitoring/resource_tracker.cpp
-	modules/monitoring/system_probe.cpp
 	modules/network/connection_manager.cpp
 	modules/network/forward_client.cpp
 	modules/utils/encoder_selector.cpp
@@ -24,9 +21,6 @@ set(EDGE_HEADERS
 	core/audio_processor.hpp
 	modules/config/device_config.hpp
 	modules/config/device_profile.hpp
-	modules/monitoring/health_monitor.hpp
-	modules/monitoring/resource_tracker.hpp
-	modules/monitoring/system_probe.hpp
 	modules/network/connection_manager.hpp
 	modules/network/forward_client.hpp
 	modules/utils/encoder_selector.hpp

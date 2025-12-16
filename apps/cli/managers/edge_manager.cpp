@@ -25,8 +25,8 @@
 
 #include "core/device_controller.hpp"
 #include "modules/config/device_profile.hpp"
-#include "common/utils/app_paths.hpp"
-#include "common/config/device_registry.hpp"
+#include "utils/app_paths.hpp"
+#include "config/device_registry.hpp"
 
 namespace SnowOwl::Cli::Managers {
 
@@ -159,7 +159,7 @@ std::string resolveProfilePath(const boost::program_options::variables_map& vm) 
         return vm["config"].as<std::string>();
     }
 
-    const auto userPath = SnowOwl::Common::Utils::configFile("edge_device_profile.json");
+    const auto userPath = SnowOwl::Utils::Paths::configFile("edge_device_profile.json");
     ensureProfileExists(userPath, templateCandidates(detectExecutablePath()));
     return userPath.string();
 }
