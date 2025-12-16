@@ -2,14 +2,14 @@
 
 #include <boost/program_options.hpp>
 
-#include "libs/utils/resource_tracker.hpp"
-#include "libs/utils/system_probe.hpp"
-#include "libs/utils/health_monitor.hpp"
+#include "../../../libs/utils/resource_tracker.hpp"
+#include "../../../libs/utils/system_probe.hpp"
+#include "../../../libs/utils/health_monitor.hpp"
 
 namespace SnowOwl::Cli::Managers {
 
-using SnowOwl::Utils::Monitoring::ResourceTracker;
-using SnowOwl::Utils::Monitoring::SystemProbe;    
+using SnowOwl::Utils::SystemResources::ResourceTracker;
+using SnowOwl::Utils::SystemResources::SystemProbe;    
 
 class ServerManager {
 public:

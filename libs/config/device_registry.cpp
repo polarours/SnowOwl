@@ -3,7 +3,7 @@
 
 #include "device_registry.hpp"
 
-namespace SnowOwl::Config::DeviceRegistry {
+namespace SnowOwl::Config {
 
 namespace {
 

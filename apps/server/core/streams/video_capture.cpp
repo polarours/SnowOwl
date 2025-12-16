@@ -7,7 +7,7 @@
 #include <thread>
 #include <utility>
 
-#include "video_capture.hpp"
+#include "core/streams/video_capture.hpp"
 
 namespace {
 
@@ -218,7 +218,8 @@ std::string VideoCapture::buildPipelineString() const {
             break;
             
         case CaptureSourceKind::NetworkStream:
-        case CaptureSourceKind::RtmpStream:
+        case CaptureSourceKind::RTMPStream:
+        case CaptureSourceKind::RTSPStream:
             if (isRtmpUri(activeUri_)) {
                 pipeline << "rtmpsrc location=" << activeUri_ << " ! flvdemux ! h264parse ! avdec_h264 ! videoconvert ! ";
                 pipeline << "video/x-raw,framerate=" << config_.fps << "/1 ! "
@@ -361,7 +362,7 @@ bool VideoCapture::shouldAttemptReconnect(int failureCount) const {
 }
 
 bool VideoCapture::isNetworkSource() const {
-    return sourceKind_ == CaptureSourceKind::NetworkStream || sourceKind_ == CaptureSourceKind::RtmpStream;
+    return sourceKind_ == CaptureSourceKind::NetworkStream || sourceKind_ == CaptureSourceKind::RTMPStream || sourceKind_ == CaptureSourceKind::RTSPStream;
 }
 
 bool VideoCapture::isFileSource() const {
@@ -383,13 +384,19 @@ std::string VideoCapture::describeSource() const {
         case CaptureSourceKind::NetworkStream:
             oss << "network stream";
             break;
-        case CaptureSourceKind::RtmpStream:
+        case CaptureSourceKind::RTMPStream:
             oss << "rtmp stream";
+            break;
+        case CaptureSourceKind::RTSPStream:
+            oss << "rtsp stream";
             break;
         case CaptureSourceKind::File:
             oss << "file source";
             break;
         case CaptureSourceKind::Camera:
+            break;
+        case CaptureSourceKind::Other:
+            oss << "unknown source";
             break;
     }
 

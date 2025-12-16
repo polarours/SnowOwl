@@ -25,8 +25,8 @@
 #include <gst/gst.h>
 #include <nlohmann/json.hpp>
 
-#include "libs/database/device_registry.hpp"
-#include "libs/config/config_manager.hpp"
+#include "../../../libs/config/device_registry.hpp"
+#include "../../../libs/config/config_manager.hpp"
 #include "plugin/plugin_manager.hpp"
 #include "core/streams/stream_dispatcher.hpp"
 #include "core/streams/video_capture_manager.hpp"
@@ -34,6 +34,9 @@
 #include "modules/network/network_server.hpp"
 #include "modules/ingest/stream_receiver.hpp"
 #include "modules/api/rest/rest_server.hpp"
+#include "../../../libs/utils/resource_tracker.hpp"
+#include "../../../libs/utils/system_probe.hpp"
+#include "../../../libs/utils/health_monitor.hpp"
 #ifdef HAVE_GRPC
 #include "modules/api/grpc/grpc_server.hpp"
 #endif
@@ -259,7 +262,7 @@ SourceRouting deriveSourceConfig(const SnowOwl::Config::DeviceRecord& device) {
             routing.primaryUri = device.uri;
             break;
         case DeviceKind::RTMP:
-            routing.sourceKind = CaptureSourceKind::RtmpStream;
+            routing.sourceKind = CaptureSourceKind::RTMPStream;
             routing.primaryUri = device.uri;
             break;
         case DeviceKind::File:
@@ -451,8 +454,8 @@ int ServerManager::startServer(const po::variables_map& vm) {
     gst_init(nullptr, nullptr);
 
     namespace fs = std::filesystem;
-    using SnowOwl::Server::Monitoring::SystemProbe;
-    using SnowOwl::Server::Monitoring::ResourceTracker;
+    using SnowOwl::Utils::SystemResources::SystemProbe;
+    using SnowOwl::Utils::SystemResources::ResourceTracker;
     using SnowOwl::Config::DeviceKind;
     using SnowOwl::Config::DeviceRecord;
     using SnowOwl::Config::DeviceRegistry;

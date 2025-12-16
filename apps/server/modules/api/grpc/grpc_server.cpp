@@ -3,7 +3,7 @@
 #include <grpcpp/grpcpp.h>
 
 #include "grpc_server.hpp"
-#include "common/config/device_registry.hpp"
+#include "config/device_registry.hpp"
 #include "snowowl.grpc.pb.h"
 
 namespace SnowOwl::Server::Modules::Api::Grpc {

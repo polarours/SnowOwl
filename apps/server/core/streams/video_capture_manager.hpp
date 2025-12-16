@@ -13,19 +13,13 @@
 
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
-
-#include "video_capture.hpp"
-#include "video_processor.hpp"
+#include "core/streams/video_processor.hpp"
+#include "core/streams/capture_types.hpp"
 #include "detection/detection_types.hpp"
 
 namespace SnowOwl::Server::Core {
 
-struct CaptureSourceConfig {
-	CaptureSourceKind kind{CaptureSourceKind::Camera};
-	int cameraId{0};
-	std::string primaryUri;
-	std::string secondaryUri;
-};
+class VideoCapture;
 
 class VideoCaptureManager {
 public:
@@ -47,7 +41,7 @@ public:
 	bool restart(const CaptureSourceConfig& config);
 	void stop();
 
-	[[nodiscard]] bool isRunning() const { return running_.load(); }
+	bool isRunning() const { return running_.load(); }
 	
 	VideoProcessor& getProcessor() { return processor_; }
     

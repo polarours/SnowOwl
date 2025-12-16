@@ -7,7 +7,7 @@
 #include <opencv2/core.hpp>
 #include <gst/gst.h>
 
-#include "libs/config/config_manager.hpp"
+#include "config/config_manager.hpp"
 #include "detection/detection_types.hpp"
 #include "modules/detection/detector.hpp"
 #include "modules/network/network_server.hpp"

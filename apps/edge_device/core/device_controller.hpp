@@ -8,18 +8,22 @@
 #include "core/stream_forwarder.hpp"
 #include "core/audio_processor.hpp"
 #include "modules/config/device_profile.hpp"
-#include "libs/utils/health_monitor.hpp"
-#include "libs/utils/resource_tracker.hpp"
-#include "libs/utils/system_probe.hpp"
+#include "utils/health_monitor.hpp"
+#include "utils/resource_tracker.hpp"
+#include "utils/system_probe.hpp"
 #include "modules/utils/encoder_selector.hpp"
 #include "modules/utils/power_manager.hpp"
+#include "config/device_registry.hpp"
 
 namespace SnowOwl::Edge::Core {
 
-using SnowOwl::Utils::Monitoring::ResourceSnapshot;
-using SnowOwl::Utils::Monitoring::HealthStatus;
-using SnowOwl::Utils::Monitoring::SystemInfo;
-using SnowOwl::Utils::Monitoring::ResourceTracker;    
+using SnowOwl::Utils::SystemResources::ResourceSnapshot;
+using SnowOwl::Utils::SystemResources::HealthStatus;
+using SnowOwl::Utils::SystemResources::SystemInfo;
+using SnowOwl::Utils::SystemResources::ResourceTracker;
+using SnowOwl::Utils::SystemResources::HealthMonitor;
+using SnowOwl::Config::DeviceRecord;
+using SnowOwl::Config::DeviceKind;
 
 class DeviceController {
 public:

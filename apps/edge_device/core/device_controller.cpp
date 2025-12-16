@@ -16,8 +16,8 @@
 #include <opencv4/opencv2/opencv.hpp>
 
 #include "device_controller.hpp"
-#include "libs/database/device_registry.hpp"
-#include "libs/utils/app_paths.hpp"
+#include "config/device_registry.hpp"
+#include "utils/app_paths.hpp"
 #include "modules/config/device_config.hpp"
 
 namespace {
@@ -51,10 +51,12 @@ std::string resolveHostName() {
 
 namespace SnowOwl::Edge::Core {
 
-using SnowOwl::Utils::Monitoring::ResourceSnapshot;
-using SnowOwl::Utils::Monitoring::SystemProbe;
-using SnowOwl::Utils::Monitoring::HealthStatus;  
-using SnowOwl::Utils::Monitoring::HealthThresholds; 
+using SnowOwl::Utils::SystemResources::ResourceSnapshot;
+using SnowOwl::Utils::SystemResources::SystemProbe;
+using SnowOwl::Utils::SystemResources::HealthStatus;  
+using SnowOwl::Utils::SystemResources::HealthThresholds;
+using SnowOwl::Config::DeviceRecord;
+using SnowOwl::Config::DeviceKind; 
     
 DeviceController::DeviceController()
     : profile_(Config::DeviceProfile::makeDefault()) 

@@ -55,7 +55,7 @@ PowerPolicy PowerManager::currentPolicy() const {
 	return policy_;
 }
 
-void PowerManager::onHealthUpdate(const Monitoring::HealthStatus& status) {
+void PowerManager::onHealthUpdate(const SnowOwl::Utils::SystemResources::HealthStatus& status) {
 	if (!status.snapshot.valid) {
 		return;
 	}

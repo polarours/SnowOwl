@@ -7,7 +7,6 @@ set(LIBS_SOURCES
     hal/thermal_camera.cpp
     plugin/plugin_manager.cpp
     protocol/message_parser.cpp
-    utils/logger.cpp
     utils/app_paths.cpp
     utils/health_monitor.cpp
     utils/resource_tracker.cpp
@@ -26,7 +25,6 @@ set(LIBS_HEADERS
     plugin/plugin_manager.hpp
     protocol/message_parser.hpp
     protocol/message_types.hpp
-    utils/logger.hpp
     utils/app_paths.hpp
     utils/health_monitor.hpp
     utils/resource_tracker.hpp
