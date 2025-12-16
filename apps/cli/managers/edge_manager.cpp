@@ -39,8 +39,8 @@ void handleSignal(int sig) {
 }
 
 constexpr const char* kDefaultEdgeProfile = R"JSON({
-  "device_id": "edge-device",
-  "name": "Generic Edge",
+  "device_id": "Default Edge Device",
+  "name": "Default Edge Device",
   "compute_tier": "capture_only",
   "cpu_cores": 20,
   "memory_mb": 16384,
@@ -249,11 +249,11 @@ bool removeDevice(const std::string& dbPath, int deviceId) {
     }
 
     if (registry.removeDevice(deviceId)) {
-        std::cout << "✅ Successfully removed device:" << std::endl;
-        std::cout << "  ID: " << device->id << std::endl;
-        std::cout << "  Name: " << device->name << std::endl;
-        std::cout << "  Kind: " << SnowOwl::Config::toString(device->kind) << std::endl;
-        std::cout << "  URI: " << device->uri << std::endl;
+        std::cout << " ✅ Successfully removed device:" << std::endl;
+        std::cout << " ID: " << device->id << std::endl;
+        std::cout << " Name: " << device->name << std::endl;
+        std::cout << " Kind: " << SnowOwl::Config::toString(device->kind) << std::endl;
+        std::cout << " URI: " << device->uri << std::endl;
         return true;
     } else {
         std::cerr << "❌ Failed to remove device with ID " << deviceId << std::endl;
@@ -279,12 +279,17 @@ bool setPrimaryDevice(const std::string& dbPath, int deviceId) {
         return false;
     }
 
+    if (device->isPrimary) {
+        std::cerr << "❌ Error: Device with ID " << deviceId << " is already primary" << std::endl;
+        return false;
+    }
+
     if (registry.setPrimaryDevice(deviceId)) {
-        std::cout << "✅ Successfully set device as primary:" << std::endl;
-        std::cout << "  ID: " << device->id << std::endl;
-        std::cout << "  Name: " << device->name << std::endl;
-        std::cout << "  Kind: " << SnowOwl::Config::toString(device->kind) << std::endl;
-        std::cout << "  URI: " << device->uri << std::endl;
+        std::cout << " ✅ Successfully set device as primary:" << std::endl;
+        std::cout << " ID: " << device->id << std::endl;
+        std::cout << " Name: " << device->name << std::endl;
+        std::cout << " Kind: " << SnowOwl::Config::toString(device->kind) << std::endl;
+        std::cout << " URI: " << device->uri << std::endl;
         return true;
     } else {
         std::cerr << "❌ Failed to set device with ID " << deviceId << " as primary" << std::endl;
@@ -308,17 +313,27 @@ int EdgeManager::startEdge(const po::variables_map& vm) {
     std::signal(SIGPIPE, SIG_IGN);
 #endif
 
+    // TODO: fix this part, realize that user can specify db path via command line
     std::string dbPath = vm.count("db-path") ? vm["db-path"].as<std::string>() : "postgresql://snowowl_dev@localhost/snowowl_dev";
-
     {
         SnowOwl::Config::DeviceRegistry registry;
         if (registry.open(dbPath)) {
-            std::cout << "✅ Connected to database: " << dbPath << std::endl;
+            std::cout << " ✅ Connected to database: " << dbPath << std::endl;
         } else {
-            std::cout << "⚠️  Warning: Unable to connect to database: " << dbPath << std::endl;
+            std::cout << " ⚠️ Warning: Unable to connect to database: " << dbPath << std::endl;
         }
     }
 
+    // print database information
+    std::cout << "===============================================================================\n";
+    std::cout << " 🌊 Edge Device - Database Connection\n";
+    std::cout << "-------------------------------------------------------------------------------\n";
+    std::cout << " 🏠 Host:     localhost" << std::endl;
+    std::cout << " 🔌 Port:     5432" << std::endl;
+    std::cout << " 🗃️ Database: snowowl_dev" << std::endl;
+    std::cout << " 👤 User:     snowowl_dev" << std::endl;
+    
+    // connect to new database, shouuld update the database information
     if (vm.count("connect-database")) {
         std::string host = vm.count("db-host") ? vm["db-host"].as<std::string>() : "localhost";
         int port = vm.count("db-port") ? vm["db-port"].as<int>() : 5432;
@@ -333,16 +348,16 @@ int EdgeManager::startEdge(const po::variables_map& vm) {
         connectionString += "@" + host + ":" + std::to_string(port) + "/" + dbName;
         
         std::cout << "===============================================================================\n";
-        std::cout << "  🌊 Edge Device - Database Connection\n";
+        std::cout << " 🌊 Edge Device - Database Connection\n";
         std::cout << "-------------------------------------------------------------------------------\n";
-        std::cout << "  🏠 Host:     " << host << std::endl;
-        std::cout << "  🔌 Port:     " << port << std::endl;
-        std::cout << "  🗃️ Database: " << dbName << std::endl;
-        std::cout << "  👤 User:     " << user << std::endl;
+        std::cout << " 🏠 Host:     " << host << std::endl;
+        std::cout << " 🔌 Port:     " << port << std::endl;
+        std::cout << " 🗃️ Database: " << dbName << std::endl;
+        std::cout << " 👤 User:     " << user << std::endl;
         if (!password.empty()) {
-            std::cout << "  🔐 Password: ***" << std::endl;
+            std::cout << " 🔐 Password: ***" << std::endl;
         } else {
-            std::cout << "  🔐 Password: (not provided)" << std::endl;
+            std::cout << " 🔐 Password: (not provided)" << std::endl;
         }
         std::cout << "-------------------------------------------------------------------------------\n";
 
@@ -356,7 +371,7 @@ int EdgeManager::startEdge(const po::variables_map& vm) {
                 std::cout << "\nConnection string for future use:" << std::endl;
                 std::cout << "  --db-path \"" << connectionString << "\"" << std::endl;
             } catch (const std::exception& e) {
-                std::cout << "\n⚠️  Connection successful but unable to query devices: " << e.what() << std::endl;
+                std::cout << "\n⚠️ Connection successful but unable to query devices: " << e.what() << std::endl;
             }
         } else {
             std::cout << "\n❌ Database connection failed!" << std::endl;
@@ -404,32 +419,36 @@ int EdgeManager::startEdge(const po::variables_map& vm) {
     if (!registryPath.empty()) {
         SnowOwl::Config::DeviceRegistry registry;
         if (registry.open(registryPath)) {
-            std::cout << "✅ Auto-connected to database via configuration: " << registryPath << std::endl;
+            std::cout << " ✅ Auto-connected to database via configuration: " << registryPath << std::endl;
         } else {
-            std::cout << "⚠️  Warning: Unable to connect to database via configuration" << std::endl;
+            std::cout << " ⚠️ Warning: Unable to connect to database via configuration" << std::endl;
         }
     }
 
+    // TODO: print out all the information about the device
+    // for now, we just print the default message
     std::cout << "===============================================================================\n";
-    std::cout << "  📋 Device Profile Information\n";
+    std::cout << " 📋 Device Profile Information\n";
     std::cout << "-------------------------------------------------------------------------------\n";
-    std::cout << "  🆔 ID: " << profile.deviceId << "\n";
-    std::cout << "  📛 Name: " << profile.name << "\n";
-    std::cout << "  ⚙️ Compute Tier: " << SnowOwl::Edge::Config::toString(profile.computeTier) << "\n";
-    std::cout << "  💻 CPU cores: " << profile.cpuCores << "\n";
-    std::cout << "  🧠 Memory (MB): " << profile.memoryMb << "\n";
-    std::cout << "  🎮 GPU memory (MB): " << profile.gpuMemoryMb << "\n";
-    std::cout << "  🖥️ Discrete GPU: " << (profile.hasDiscreteGpu ? "yes" : "no") << "\n";
-    std::cout << "  🔢 Supports FP16: " << (profile.supportsFp16 ? "yes" : "no") << "\n";
+    std::cout << " 🆔 ID: " << profile.deviceId << "\n";
+    std::cout << " 📛 Name: " << profile.name << "\n";
+    std::cout << " ⚙️ Compute Tier: " << SnowOwl::Edge::Config::toString(profile.computeTier) << "\n";
+    std::cout << " 💻 CPU cores: " << profile.cpuCores << "\n";
+    std::cout << " 🧠 Memory (MB): " << profile.memoryMb << "\n";
+    std::cout << " 🎮 GPU memory (MB): " << profile.gpuMemoryMb << "\n";
+    std::cout << " 🖥️ Discrete GPU: " << (profile.hasDiscreteGpu ? "yes" : "no") << "\n";
+    std::cout << " 🔢 Supports FP16: " << (profile.supportsFp16 ? "yes" : "no") << "\n";
+    std::cout << " 📡 Uplink: enabled" << std::endl; // TODO: print out uplink information
+    std::cout << " 📤 Forward: enabled" << std::endl; // TODO: print out forward information
     std::cout << "-------------------------------------------------------------------------------\n";
 
     if (controller->shouldRunLocalDetection()) {
-        std::cout << "  🔍 On-device detection: enabled\n";
-        std::cout << "  🧠 Preferred model: " << controller->recommendedModel() << "\n";
-        std::cout << "  📦 Model format: " << profile.detectionPolicy.modelFormat << "\n";
-        std::cout << "  📏 Max model size (MB): " << profile.detectionPolicy.maxModelSizeMB << "\n";
+        std::cout << " 🔍 On-device detection: enabled\n";
+        std::cout << " 🧠 Preferred model: " << controller->recommendedModel() << "\n";
+        std::cout << " 📦 Model format: " << profile.detectionPolicy.modelFormat << "\n";
+        std::cout << " 📏 Max model size (MB): " << profile.detectionPolicy.maxModelSizeMB << "\n";
     } else {
-        std::cout << "  ❌ On-device detection: disabled (forward-only)\n";
+        std::cout << " ❌ On-device detection: disabled (forward-only)\n";
     }
     std::cout << "-------------------------------------------------------------------------------\n";
 
@@ -442,22 +461,22 @@ int EdgeManager::startEdge(const po::variables_map& vm) {
     std::thread captureThread([&controller]() {
         bool captureStarted = controller->startCapture();
         if (captureStarted) {
-            std::cout << "  ▶️  Capture: running (mode="
+            std::cout << " ▶️ Capture: running (mode="
                       << SnowOwl::Edge::Config::toString(controller->profile().capture.kind)
                       << ")" << std::endl;
 
             const auto& forwardCfg = controller->forwarderConfig();
             if (forwardCfg.enabled) {
                 if (controller->forwarderRunning()) {
-                    std::cout << "  📡 Forwarder: streaming to " << forwardCfg.host << ':' << forwardCfg.port << std::endl;
+                    std::cout << " 📡 Forwarder: streaming to " << forwardCfg.host << ':' << forwardCfg.port << std::endl;
                 } else {
-                    std::cout << "  ❌ Forwarder: failed to start (check network target)" << std::endl;
+                    std::cout << " ❌ Forwarder: failed to start (check network target)" << std::endl;
                 }
             } else {
-                std::cout << "  🚫 Forwarder: disabled" << std::endl;
+                std::cout << " 🚫 Forwarder: disabled" << std::endl;
             }
             std::cout << "-------------------------------------------------------------------------------\n";
-            std::cout << "  ⌨️  Press Ctrl+C to stop..." << std::endl;
+            std::cout << " ⌨️ Press Ctrl+C to stop..." << std::endl;
             std::cout << "===============================================================================\n";
 
             while (g_running.load()) {
