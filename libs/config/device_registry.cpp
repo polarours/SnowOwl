@@ -1,7 +1,7 @@
 #include <iostream>
 #include <libpq-fe.h>
 
-#include "config/device_registry.hpp"
+#include "device_registry.hpp"
 
 namespace SnowOwl::Config {
 

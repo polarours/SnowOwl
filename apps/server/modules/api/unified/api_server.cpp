@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 
-#include "common/config/device_registry.hpp"
+#include "config/device_registry.hpp"
 #include "core/streams/video_processor.hpp"
 #include "modules/api/rest/rest_server.hpp"
 #include "modules/api/websocket/websocket_server.hpp"

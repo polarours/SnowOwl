@@ -16,9 +16,10 @@
 #include <nlohmann/json.hpp>
 
 #include "modules/api/rest/rest_server.hpp"
-#include "common/config/device_registry.hpp"
+#include "config/device_registry.hpp"
 #include "core/streams/video_processor.hpp"
 #include "core/streams/video_capture_manager.hpp"
+#include "core/streams/video_capture.hpp"
 #include "modules/utils/server_utils.hpp"
 #include "modules/discovery/device_discovery.hpp"
 

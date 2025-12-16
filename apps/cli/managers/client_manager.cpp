@@ -1,8 +1,9 @@
-#include "client_manager.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <boost/program_options.hpp>
+
+#include "client_manager.hpp"
 #include "core/client_state.hpp"
 #include "web/web_client.hpp"
 #include "flutter/flutter_client.hpp"

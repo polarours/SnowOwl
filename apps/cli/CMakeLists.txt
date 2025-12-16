@@ -19,6 +19,8 @@ add_library(owl_cli_managers STATIC ${CLI_CORE_SOURCES} ${CLI_MANAGER_SOURCES})
 
 target_include_directories(owl_cli_managers PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/apps/server
+    ${CMAKE_SOURCE_DIR}/apps/edge_device
     ${CMAKE_SOURCE_DIR}/apps/client
 )
 

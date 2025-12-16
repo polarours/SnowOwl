@@ -17,7 +17,7 @@
 #include <boost/beast/websocket.hpp>
 #include <nlohmann/json.hpp>
 
-#include "common/config/device_registry.hpp"
+#include "config/device_registry.hpp"
 #include "core/streams/video_processor.hpp"
 #include "modules/utils/server_utils.hpp"
 

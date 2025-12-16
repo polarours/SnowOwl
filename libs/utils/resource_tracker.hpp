@@ -7,7 +7,7 @@
 #include <optional>
 #include <thread>
 
-namespace SnowOwl::Edge::Monitoring {
+namespace SnowOwl::Utils::SystemResources {
 
 struct ResourceSnapshot {
 	bool valid{false};

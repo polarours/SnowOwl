@@ -63,7 +63,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-
         return SnowOwl::Cli::Managers::ServerManager::startServer(vm);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
